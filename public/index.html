@@ -2,71 +2,200 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MedRAC-QA</title>
-  <meta name="description" content="Evidence-grounded medical question answering with a lightweight LLM, retrieval (RAG) and a validated semantic cache (CAG).">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MedRAC-QA · Evidence-grounded health answers</title>
+  <meta name="description" content="Ask a health question and see how a lightweight LLM finds, checks and cites the answer from NIH sources, using retrieval (RAG) and a safety-checked answer cache (CAG).">
+  <meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="wrap">
-      <div class="brand">
-        <img src="favicon.svg" alt="" width="28" height="28">
-        <div>
-          <h1>MedRAC-QA</h1>
-          <p>Lightweight LLM + RAG + CAG for medical health questions</p>
-        </div>
-      </div>
-      <span id="status" class="status">connecting…</span>
+  <!-- Reusable line icons (Lucide-style, 24px grid, stroke = currentColor) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M20 17v4H6.5A2.5 2.5 0 0 1 4 18.5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></symbol>
+  </svg>
+
+  <header class="nav" role="banner">
+    <div class="nav__inner">
+      <a class="brand" href="./" aria-label="MedRAC-QA home">
+        <img src="favicon.svg" alt="" width="26" height="26">
+        <span>MedRAC-QA</span>
+      </a>
+      <nav class="nav__links" aria-label="Sections">
+        <a href="#ask">Ask</a>
+        <a href="#learn">How it works</a>
+        <a href="#results">Results</a>
+      </nav>
+      <span id="status" class="status" aria-live="polite"><span class="dot"></span><span class="status__text">Connecting…</span></span>
     </div>
   </header>
 
-  <main class="wrap">
-    <form id="ask" class="ask" autocomplete="off">
-      <label for="q" class="sr">Your health question</label>
-      <textarea id="q" rows="2" maxlength="500" placeholder="e.g. What are the symptoms of anemia?" required></textarea>
-      <div class="row">
-        <div class="modes" role="radiogroup" aria-label="Pipeline mode">
-          <label><input type="radio" name="mode" value="full" checked> Full (CAG + RAG)</label>
-          <label><input type="radio" name="mode" value="rag"> RAG only</label>
-          <label><input type="radio" name="mode" value="llm_only"> LLM only</label>
+  <main>
+    <!-- Hero + question box -->
+    <section class="hero" id="ask">
+      <p class="eyebrow">Lightweight LLM · RAG · CAG</p>
+      <h1>Health answers you can&nbsp;<span class="grad">trace&nbsp;back</span>.</h1>
+      <p class="lede">Ask a health question. Watch how the AI checks safety, reuses a verified answer or looks up NIH sources, and checks every sentence before it answers.</p>
+
+      <form id="ask-form" class="ask card" autocomplete="off">
+        <label for="q" class="ask__label">Your question</label>
+        <div class="ask__field">
+          <textarea id="q" rows="2" maxlength="500" placeholder="e.g. What are the symptoms of anemia?" required aria-describedby="q-help"></textarea>
+          <button type="submit" id="go" class="btn-primary" aria-label="Ask">
+            <span class="btn-primary__text">Ask</span>
+            <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg>
+          </button>
         </div>
-        <button type="submit" id="go">Ask</button>
-      </div>
-      <div class="examples" id="examples"></div>
-    </form>
+        <div class="ask__row">
+          <div class="segmented" role="radiogroup" aria-label="Pipeline mode">
+            <input type="radio" name="mode" id="m-full" value="full" checked><label for="m-full">Full system</label>
+            <input type="radio" name="mode" id="m-rag" value="rag"><label for="m-rag">RAG only</label>
+            <input type="radio" name="mode" id="m-llm" value="llm_only"><label for="m-llm">LLM only</label>
+          </div>
+          <p id="q-help" class="hint"><span id="mode-hint">Cache + retrieval + checks: the complete pipeline.</span></p>
+        </div>
+      </form>
 
-    <section id="result" class="result" hidden>
-      <div class="meta">
-        <span id="route" class="badge"></span>
-        <span id="latency" class="muted"></span>
-        <span id="model" class="muted"></span>
+      <div class="try">
+        <p class="try__title">Try a guided demo</p>
+        <div class="try__list" id="examples"></div>
       </div>
-      <div id="answer" class="answer"></div>
-      <div id="notes"></div>
-      <div id="citations"></div>
-
-      <details id="trace">
-        <summary>How this answer was produced</summary>
-        <div id="trace-body"></div>
-      </details>
-      <p id="disclaimer" class="disclaimer"></p>
     </section>
 
-    <section class="about">
-      <h2>How it works</h2>
-      <ol class="flow">
-        <li><b>Safety screen</b> Emergencies get fixed guidance (112 / 108) and skip the AI.</li>
-        <li><b>CAG – semantic cache</b> A validated earlier answer is reused only if the question has the same meaning, intent and clinical context (age group, pregnancy, type numbers).</li>
-        <li><b>RAG – retrieval</b> Otherwise the top-5 passages are found among 27k NIH passages (MedQuAD) using MiniLM embeddings.</li>
-        <li><b>Evidence gate</b> If nothing relevant is found, the system says so instead of guessing.</li>
-        <li><b>Lightweight LLM</b> writes a short answer that cites the passages.</li>
-        <li><b>Validation</b> Every sentence is checked against its cited passage before the answer is shown or cached.</li>
-      </ol>
-      <p class="muted small">B.Tech CSE project, SMVDU · Kashav Thappa (23BCS040) · Guide: Prof. (Dr.) Baij Nath Kaushik</p>
+    <!-- Answer -->
+    <section id="result" class="result" hidden aria-live="polite">
+      <article class="card answer-card">
+        <header class="answer-head">
+          <span id="route" class="pill"></span>
+          <span id="latency" class="meta"></span>
+          <span id="model" class="meta"></span>
+        </header>
+
+        <ol class="pipeline" id="pipeline" aria-label="Steps the system took"></ol>
+
+        <div id="answer" class="answer"></div>
+        <div id="notes"></div>
+
+        <div id="sources-wrap" hidden>
+          <h3 class="sub">Sources</h3>
+          <ul id="citations" class="sources"></ul>
+        </div>
+
+        <details id="factcheck" class="disclose" hidden>
+          <summary><span>Sentence-by-sentence fact check</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <ul id="factcheck-list" class="facts"></ul>
+        </details>
+
+        <details id="trace" class="disclose">
+          <summary><span>Under the hood</span><svg class="ic" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <dl id="trace-body" class="kv"></dl>
+        </details>
+
+        <p id="disclaimer" class="disclaimer"></p>
+      </article>
+    </section>
+
+    <!-- How it works (educational bento) -->
+    <section class="section" id="learn">
+      <p class="eyebrow">How it works</p>
+      <h2>Six steps between your question and the answer.</h2>
+      <div class="bento">
+        <article class="tile tile--wide">
+          <span class="tile__icon t-red"><svg class="ic"><use href="#i-shield"/></svg></span>
+          <h3>1 · Safety first</h3>
+          <p>Emergencies such as chest pain happening right now or self-harm get fixed guidance (112, 108, Tele-MANAS 14416) straight away, with no AI involved. Dose, personal and "latest" questions are never answered from the cache.</p>
+        </article>
+        <article class="tile">
+          <span class="tile__icon t-teal"><svg class="ic"><use href="#i-bolt"/></svg></span>
+          <h3>2 · CAG: verified cache</h3>
+          <p>A reworded question gets a verified earlier answer in milliseconds, but only if its meaning, intent and clinical context all match.</p>
+        </article>
+        <article class="tile">
+          <span class="tile__icon t-blue"><svg class="ic"><use href="#i-search"/></svg></span>
+          <h3>3 · RAG: retrieval</h3>
+          <p>Otherwise, MiniLM embeddings find the 5 most relevant passages among 27,470 from NIH websites (MedQuAD).</p>
+        </article>
+        <article class="tile">
+          <span class="tile__icon t-amber"><svg class="ic"><use href="#i-gauge"/></svg></span>
+          <h3>4 · Evidence gate</h3>
+          <p>If nothing relevant is found, the system says so instead of guessing.</p>
+        </article>
+        <article class="tile">
+          <span class="tile__icon t-violet"><svg class="ic"><use href="#i-spark"/></svg></span>
+          <h3>5 · Lightweight LLM</h3>
+          <p>A small, fast model writes a short answer using only those passages, and cites each one.</p>
+        </article>
+        <article class="tile tile--full">
+          <span class="tile__icon t-green"><svg class="ic"><use href="#i-check"/></svg></span>
+          <h3>6 · Verify, then remember</h3>
+          <p>Every sentence is checked against the passage it cites. Unsupported answers are replaced by the sources themselves. Only verified, reusable answers go into the shared cache.</p>
+        </article>
+      </div>
+
+      <div class="card example-card">
+        <div>
+          <p class="eyebrow">Why the cache needs a gate</p>
+          <h3>Two questions can look alike and still need different answers.</h3>
+          <p class="muted">"Symptoms of anemia" and "symptoms of anemia <b>in children</b>" are more than 90% similar to an embedding model. A plain cache would reuse the wrong answer. MedRAC-QA checks intent, age group, pregnancy, type numbers and topic words first.</p>
+        </div>
+        <div class="vs">
+          <div class="vs__q"><span class="tag ok">cached</span>What are the symptoms of anemia?</div>
+          <div class="vs__q"><span class="tag ok">reused</span>What signs and symptoms does anemia cause?</div>
+          <div class="vs__q"><span class="tag no">not reused</span>What are the symptoms of anemia in children?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="section" id="results">
+      <p class="eyebrow">Mid-semester results</p>
+      <h2>Measured, not assumed.</h2>
+      <div class="stats">
+        <article class="stat card">
+          <p class="stat__num">1.7<span>%</span></p>
+          <p class="stat__label">unsafe cache reuse</p>
+          <p class="stat__sub">vs 10.5% for a plain semantic cache, with 96% useful hits kept (1,200 test probes)</p>
+        </article>
+        <article class="stat card">
+          <p class="stat__num">0</p>
+          <p class="stat__label">wrong reuses across age groups</p>
+          <p class="stat__sub">"in children / during pregnancy / in older adults": 34 with a plain cache</p>
+        </article>
+        <article class="stat card">
+          <p class="stat__num">~5<span>ms</span></p>
+          <p class="stat__label">for a verified cache hit</p>
+          <p class="stat__sub">vs ~4 s for a freshly generated, grounded answer</p>
+        </article>
+        <article class="stat card">
+          <p class="stat__num">96<span>%</span></p>
+          <p class="stat__label">off-topic questions refused</p>
+          <p class="stat__sub">while 96% of real consumer health questions (TREC LiveQA) are still answered</p>
+        </article>
+      </div>
     </section>
   </main>
+
+  <footer class="footer">
+    <p><b>MedRAC-QA</b> · B.Tech CSE Project, SMVDU Katra · Kashav Thappa (23BCS040) · Guide: Prof. (Dr.) Baij Nath Kaushik</p>
+    <p class="muted">General health information from NIH sources (MedQuAD, CC BY 4.0). Not medical advice. In an emergency call 112.</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>

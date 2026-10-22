@@ -31,6 +31,24 @@ def _env(name: str, default: str) -> str:
     return value or default
 
 
+def _find_env(suffixes: tuple[str, ...]) -> str:
+    """Value of the first variable whose name ends with one of `suffixes`.
+
+    Vercel's Upstash integration may add a prefix chosen when connecting the
+    database (e.g. STORAGE_KV_REST_API_URL), so exact names cannot be assumed.
+    Read-only tokens are skipped because the cache must write.
+    """
+    for name in sorted(os.environ):
+        if name.endswith(suffixes) and "READ_ONLY" not in name and os.environ[name].strip():
+            return os.environ[name].strip()
+    return ""
+
+
+def redis_env_names() -> list[str]:
+    """Names (never values) of Redis-related variables, for /api/health diagnostics."""
+    return sorted(n for n in os.environ if "REDIS" in n or n.endswith(("KV_URL", "KV_REST_API_URL", "KV_REST_API_TOKEN")))
+
+
 def _float(name: str, default: float) -> float:
     return float(_env(name, str(default)))
 
@@ -74,12 +92,8 @@ class Settings:
     #      the UPSTASH_REDIS_REST_* or the KV_REST_API_* names automatically.
     #   2. a JSON-lines file when CACHE_FILE is set (local runs)
     #   3. memory of this process
-    redis_url: str = field(
-        default_factory=lambda: _env("UPSTASH_REDIS_REST_URL", _env("KV_REST_API_URL", ""))
-    )
-    redis_token: str = field(
-        default_factory=lambda: _env("UPSTASH_REDIS_REST_TOKEN", _env("KV_REST_API_TOKEN", ""))
-    )
+    redis_url: str = field(default_factory=lambda: _find_env(("REDIS_REST_URL", "KV_REST_API_URL")))
+    redis_token: str = field(default_factory=lambda: _find_env(("REDIS_REST_TOKEN", "KV_REST_API_TOKEN")))
     cache_file: str = field(default_factory=lambda: _env("CACHE_FILE", ""))
 
     # ---- Files ----

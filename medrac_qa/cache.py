@@ -342,6 +342,7 @@ class SemanticCache:
         return {
             "mode": self.mode,
             "backend": self.backend.name,
+            "backend_errors": getattr(self.backend, "errors", 0),
             "entries": len(self.entries),
             "threshold": self.threshold,
             **self.stats,

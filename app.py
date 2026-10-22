@@ -23,6 +23,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from medrac_qa import __version__
+from medrac_qa.config import redis_env_names
 from medrac_qa.pipeline import MODES
 from medrac_qa.service import build_pipeline
 
@@ -80,6 +81,8 @@ def health() -> dict:
             "support_threshold_delta": s.support_threshold,
         },
         "cache": pipeline.cache.summary(),
+        # Names only, never values: shows whether the Redis integration is wired up.
+        "redis_env_vars": redis_env_names(),
     }
 
 

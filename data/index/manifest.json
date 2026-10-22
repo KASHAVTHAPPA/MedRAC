@@ -1,0 +1,12 @@
+{
+  "version": "0e90c213395b",
+  "dataset": "MedQuAD (CC BY 4.0), 9 subsets with answers",
+  "qa_pairs": 16407,
+  "unique_answers": 15809,
+  "passages": 27470,
+  "chunk_words": 180,
+  "chunk_overlap": 30,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2 (ONNX, quint8)",
+  "embedding_text": "question + ' ' + chunk",
+  "built": "2026-10-22"
+}

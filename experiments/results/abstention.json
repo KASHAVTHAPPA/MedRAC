@@ -1,0 +1,104 @@
+{
+  "in_scope": {
+    "liveqa": 104,
+    "medquad": 200
+  },
+  "out_of_scope": 50,
+  "score_summary": {
+    "liveqa": {
+      "median": 0.554,
+      "min": 0.306,
+      "max": 0.848
+    },
+    "medquad": {
+      "median": 0.777,
+      "min": 0.387,
+      "max": 0.907
+    },
+    "out_of_scope": {
+      "median": 0.243,
+      "min": 0.137,
+      "max": 0.493
+    }
+  },
+  "sweep": [
+    {
+      "gamma": 0.3,
+      "coverage_liveqa": 1.0,
+      "coverage_medquad": 1.0,
+      "reject_out_of_scope": 0.72
+    },
+    {
+      "gamma": 0.35,
+      "coverage_liveqa": 0.981,
+      "coverage_medquad": 1.0,
+      "reject_out_of_scope": 0.9
+    },
+    {
+      "gamma": 0.4,
+      "coverage_liveqa": 0.962,
+      "coverage_medquad": 0.995,
+      "reject_out_of_scope": 0.96
+    },
+    {
+      "gamma": 0.45,
+      "coverage_liveqa": 0.894,
+      "coverage_medquad": 0.995,
+      "reject_out_of_scope": 0.98
+    },
+    {
+      "gamma": 0.5,
+      "coverage_liveqa": 0.721,
+      "coverage_medquad": 0.995,
+      "reject_out_of_scope": 1.0
+    },
+    {
+      "gamma": 0.55,
+      "coverage_liveqa": 0.538,
+      "coverage_medquad": 0.99,
+      "reject_out_of_scope": 1.0
+    },
+    {
+      "gamma": 0.6,
+      "coverage_liveqa": 0.375,
+      "coverage_medquad": 0.985,
+      "reject_out_of_scope": 1.0
+    },
+    {
+      "gamma": 0.65,
+      "coverage_liveqa": 0.25,
+      "coverage_medquad": 0.975,
+      "reject_out_of_scope": 1.0
+    },
+    {
+      "gamma": 0.7,
+      "coverage_liveqa": 0.154,
+      "coverage_medquad": 0.895,
+      "reject_out_of_scope": 1.0
+    }
+  ],
+  "rule": "max coverage with out-of-scope rejection >= 95%",
+  "chosen_gamma": 0.4,
+  "highest_scoring_out_of_scope": [
+    [
+      0.493,
+      "What causes earthquakes?"
+    ],
+    [
+      0.408,
+      "How do volcanoes form?"
+    ],
+    [
+      0.372,
+      "What is the difference between a virus and a worm in computers?"
+    ],
+    [
+      0.366,
+      "How do I clean a laptop keyboard?"
+    ],
+    [
+      0.364,
+      "What is the population of India?"
+    ]
+  ]
+}

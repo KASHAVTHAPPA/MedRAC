@@ -1,0 +1,6 @@
+# Runtime dependencies only (this is what Vercel installs). No PyTorch needed.
+fastapi==0.160.0
+numpy==2.2.6
+onnxruntime==1.23.2
+tokenizers==0.23.3
+requests==2.34.2

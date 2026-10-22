@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MedRAC-QA</title>
+  <meta name="description" content="Evidence-grounded medical question answering with a lightweight LLM, retrieval (RAG) and a validated semantic cache (CAG).">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand">
+        <img src="favicon.svg" alt="" width="28" height="28">
+        <div>
+          <h1>MedRAC-QA</h1>
+          <p>Lightweight LLM + RAG + CAG for medical health questions</p>
+        </div>
+      </div>
+      <span id="status" class="status">connecting…</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="ask" class="ask" autocomplete="off">
+      <label for="q" class="sr">Your health question</label>
+      <textarea id="q" rows="2" maxlength="500" placeholder="e.g. What are the symptoms of anemia?" required></textarea>
+      <div class="row">
+        <div class="modes" role="radiogroup" aria-label="Pipeline mode">
+          <label><input type="radio" name="mode" value="full" checked> Full (CAG + RAG)</label>
+          <label><input type="radio" name="mode" value="rag"> RAG only</label>
+          <label><input type="radio" name="mode" value="llm_only"> LLM only</label>
+        </div>
+        <button type="submit" id="go">Ask</button>
+      </div>
+      <div class="examples" id="examples"></div>
+    </form>
+
+    <section id="result" class="result" hidden>
+      <div class="meta">
+        <span id="route" class="badge"></span>
+        <span id="latency" class="muted"></span>
+        <span id="model" class="muted"></span>
+      </div>
+      <div id="answer" class="answer"></div>
+      <div id="notes"></div>
+      <div id="citations"></div>
+
+      <details id="trace">
+        <summary>How this answer was produced</summary>
+        <div id="trace-body"></div>
+      </details>
+      <p id="disclaimer" class="disclaimer"></p>
+    </section>
+
+    <section class="about">
+      <h2>How it works</h2>
+      <ol class="flow">
+        <li><b>Safety screen</b> Emergencies get fixed guidance (112 / 108) and skip the AI.</li>
+        <li><b>CAG – semantic cache</b> A validated earlier answer is reused only if the question has the same meaning, intent and clinical context (age group, pregnancy, type numbers).</li>
+        <li><b>RAG – retrieval</b> Otherwise the top-5 passages are found among 27k NIH passages (MedQuAD) using MiniLM embeddings.</li>
+        <li><b>Evidence gate</b> If nothing relevant is found, the system says so instead of guessing.</li>
+        <li><b>Lightweight LLM</b> writes a short answer that cites the passages.</li>
+        <li><b>Validation</b> Every sentence is checked against its cited passage before the answer is shown or cached.</li>
+      </ol>
+      <p class="muted small">B.Tech CSE project, SMVDU · Kashav Thappa (23BCS040) · Guide: Prof. (Dr.) Baij Nath Kaushik</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+# Questions a medical QA system should NOT answer from the NIH knowledge base.
+# Used to calibrate the evidence threshold (gamma). One question per line.
+Who won the cricket world cup in 2011?
+What is the capital of Australia?
+How do I reverse a linked list in Python?
+What is the best smartphone under 20000 rupees?
+How do I make paneer butter masala?
+What is the price of gold today?
+Who is the prime minister of Japan?
+How does a car engine work?
+What is the meaning of life?
+Explain the theory of relativity.
+How do I open a bank account?
+What is the population of India?
+Which is the tallest mountain in the world?
+How do I learn to play the guitar?
+What are the rules of chess?
+How do I fix a leaking tap?
+What is machine learning?
+Recommend a good movie to watch tonight.
+How far is the moon from the earth?
+What is the GST rate on electronics?
+How do I train my dog to sit?
+What is the boiling point of water at high altitude?
+Write a poem about the monsoon.
+How do I change my car tyre?
+What is the history of the Mughal empire?
+How do I improve my CIBIL score?
+What is the speed of light?
+How do solar panels work?
+Who wrote the Ramayana?
+What programming language should I learn first?
+How do I grow tomatoes on a balcony?
+What is inflation?
+When is the next solar eclipse?
+How do I book a train ticket online?
+What is the difference between a virus and a worm in computers?
+How do I bake a chocolate cake?
+What time zone is London in?
+How do airplanes stay in the air?
+What is blockchain technology?
+How do I prepare for a job interview?
+What are the best places to visit in Kashmir?
+How do I clean a laptop keyboard?
+What is the stock market?
+How many players are there in a football team?
+What is photosynthesis?
+How do I write a resignation letter?
+What is the national animal of India?
+How do I set up a home wifi router?
+What causes earthquakes?
+How do volcanoes form?

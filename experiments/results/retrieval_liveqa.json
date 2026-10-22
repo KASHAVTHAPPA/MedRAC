@@ -1,0 +1,32 @@
+{
+  "dataset": "TREC 2017 LiveQA-Med test questions, MedQuAD judged answers (grade >= 3)",
+  "questions_evaluated": 38,
+  "knowledge_base": {
+    "passages": 27470,
+    "version": "0e90c213395b"
+  },
+  "original_question": {
+    "hit@1": 0.316,
+    "hit@3": 0.474,
+    "hit@5": 0.579,
+    "hit@10": 0.711,
+    "recall@1": 0.186,
+    "recall@3": 0.302,
+    "recall@5": 0.383,
+    "recall@10": 0.508,
+    "mrr@10": 0.422,
+    "median_latency_ms": 4.2
+  },
+  "nlm_summary": {
+    "hit@1": 0.368,
+    "hit@3": 0.579,
+    "hit@5": 0.711,
+    "hit@10": 0.816,
+    "recall@1": 0.201,
+    "recall@3": 0.395,
+    "recall@5": 0.495,
+    "recall@10": 0.659,
+    "mrr@10": 0.506,
+    "median_latency_ms": 3.2
+  }
+}

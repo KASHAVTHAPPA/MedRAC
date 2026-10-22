@@ -1,0 +1,507 @@
+{
+  "summary": {
+    "llm_model": "gemini-3.5-flash-lite",
+    "routes": {
+      "rag": 23,
+      "cache": 9,
+      "fallback": 4,
+      "llm_only": 12
+    },
+    "as_expected": {
+      "base": 12,
+      "paraphrase": 9,
+      "context": 8,
+      "llm_only": 12
+    },
+    "median_ms_by_route": {
+      "rag": 4127.2,
+      "cache": 5.9,
+      "fallback": 3355.4,
+      "llm_only": 3315.8
+    },
+    "validation_pass_rate": 0.852,
+    "mean_supported_sentence_share": 0.985
+  },
+  "rows": [
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What are the symptoms of anemia?",
+      "route": "rag",
+      "total_ms": 1446.2,
+      "validation_passed": true,
+      "supported_share": 0.9,
+      "cache_reason": "cache empty"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "What signs and symptoms does anemia cause?",
+      "route": "cache",
+      "total_ms": 5.5,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "What signs and symptoms does anemia cause in children?",
+      "route": "rag",
+      "total_ms": 1511.2,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "rejected: different clinical context (children)"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "How is glaucoma diagnosed?",
+      "route": "rag",
+      "total_ms": 1410.0,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.28 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "What tests are used to diagnose glaucoma?",
+      "route": "rag",
+      "total_ms": 4078.9,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.84 below 0.85"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "What tests are used to diagnose glaucoma in older adults?",
+      "route": "rag",
+      "total_ms": 1445.6,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "rejected: different clinical context (elderly)"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What causes high blood pressure?",
+      "route": "rag",
+      "total_ms": 4582.7,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.34 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "What are the causes of high blood pressure?",
+      "route": "cache",
+      "total_ms": 4.6,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "What are the causes of high blood pressure during pregnancy?",
+      "route": "rag",
+      "total_ms": 4702.4,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.81 below 0.85"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What are the treatments for asthma?",
+      "route": "rag",
+      "total_ms": 5270.4,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.23 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "How is asthma treated?",
+      "route": "cache",
+      "total_ms": 2.8,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "How is asthma treated in children?",
+      "route": "rag",
+      "total_ms": 5232.5,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.80 below 0.85"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What is psoriasis?",
+      "route": "rag",
+      "total_ms": 4207.6,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.24 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "Can you tell me what psoriasis is?",
+      "route": "cache",
+      "total_ms": 6.7,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "Can you tell me what psoriasis is in children?",
+      "route": "fallback",
+      "total_ms": 4634.8,
+      "validation_passed": false,
+      "supported_share": null,
+      "cache_reason": "similarity 0.82 below 0.85"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "How to prevent osteoporosis?",
+      "route": "rag",
+      "total_ms": 4320.7,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.29 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "How can osteoporosis be prevented?",
+      "route": "cache",
+      "total_ms": 6.4,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "How can osteoporosis be prevented in older adults?",
+      "route": "rag",
+      "total_ms": 3532.7,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "rejected: different clinical context (elderly)"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What are the symptoms of hypothyroidism?",
+      "route": "rag",
+      "total_ms": 2730.0,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.53 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "What are the common signs of hypothyroidism?",
+      "route": "cache",
+      "total_ms": 6.9,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "What are the common signs of hypothyroidism during pregnancy?",
+      "route": "fallback",
+      "total_ms": 2634.3,
+      "validation_passed": false,
+      "supported_share": null,
+      "cache_reason": "similarity 0.85 below 0.85"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What is the outlook for kidney failure?",
+      "route": "rag",
+      "total_ms": 1037.5,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.32 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "What is the prognosis of kidney failure?",
+      "route": "rag",
+      "total_ms": 4510.9,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.84 below 0.85"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "What is the prognosis of kidney failure in older adults?",
+      "route": "fallback",
+      "total_ms": 4076.6,
+      "validation_passed": false,
+      "supported_share": null,
+      "cache_reason": "rejected: different clinical context (elderly)"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What are the treatments for depression?",
+      "route": "rag",
+      "total_ms": 3868.1,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.43 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "How is depression treated?",
+      "route": "rag",
+      "total_ms": 4589.8,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.84 below 0.85"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "How is depression treated during pregnancy?",
+      "route": "fallback",
+      "total_ms": 1062.4,
+      "validation_passed": false,
+      "supported_share": null,
+      "cache_reason": "similarity 0.75 below 0.85"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What causes gout?",
+      "route": "rag",
+      "total_ms": 4945.8,
+      "validation_passed": true,
+      "supported_share": 0.75,
+      "cache_reason": "similarity 0.39 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "What is the cause of gout?",
+      "route": "cache",
+      "total_ms": 4.7,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "What is the cause of gout in older adults?",
+      "route": "rag",
+      "total_ms": 3388.9,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "rejected: different clinical context (elderly)"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What are the symptoms of celiac disease?",
+      "route": "rag",
+      "total_ms": 13523.0,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.56 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "Which symptoms are seen in celiac disease?",
+      "route": "cache",
+      "total_ms": 5.9,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "Which symptoms are seen in celiac disease in children?",
+      "route": "rag",
+      "total_ms": 4733.0,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "rejected: different clinical context (children)"
+    },
+    {
+      "kind": "base",
+      "mode": "full",
+      "question": "What is glaucoma?",
+      "route": "rag",
+      "total_ms": 1064.2,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.84 below 0.85"
+    },
+    {
+      "kind": "paraphrase",
+      "mode": "full",
+      "question": "Please explain glaucoma.",
+      "route": "cache",
+      "total_ms": 5.9,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": "validated cache hit"
+    },
+    {
+      "kind": "context",
+      "mode": "full",
+      "question": "Please explain glaucoma in children?",
+      "route": "rag",
+      "total_ms": 4127.2,
+      "validation_passed": true,
+      "supported_share": 1.0,
+      "cache_reason": "similarity 0.85 below 0.85"
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What are the symptoms of anemia?",
+      "route": "llm_only",
+      "total_ms": 3640.7,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "How is glaucoma diagnosed?",
+      "route": "llm_only",
+      "total_ms": 2942.3,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What causes high blood pressure?",
+      "route": "llm_only",
+      "total_ms": 3459.3,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What are the treatments for asthma?",
+      "route": "llm_only",
+      "total_ms": 3771.8,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What is psoriasis?",
+      "route": "llm_only",
+      "total_ms": 2780.8,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "How to prevent osteoporosis?",
+      "route": "llm_only",
+      "total_ms": 3716.8,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What are the symptoms of hypothyroidism?",
+      "route": "llm_only",
+      "total_ms": 3894.3,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What is the outlook for kidney failure?",
+      "route": "llm_only",
+      "total_ms": 1235.3,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What are the treatments for depression?",
+      "route": "llm_only",
+      "total_ms": 3193.7,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What causes gout?",
+      "route": "llm_only",
+      "total_ms": 1784.5,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What are the symptoms of celiac disease?",
+      "route": "llm_only",
+      "total_ms": 3437.8,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    },
+    {
+      "kind": "llm_only",
+      "mode": "llm_only",
+      "question": "What is glaucoma?",
+      "route": "llm_only",
+      "total_ms": 1961.0,
+      "validation_passed": null,
+      "supported_share": null,
+      "cache_reason": null
+    }
+  ]
+}

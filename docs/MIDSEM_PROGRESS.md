@@ -2,7 +2,7 @@
 
 **Project:** A Lightweight LLM + RAG + CAG Framework for Medical Health Question Answering
 **Student:** Kashav Thappa (23BCS040) · **Guide:** Prof. (Dr.) Baij Nath Kaushik
-**Audit date:** 22 October 2026 · **Build complete by:** 15 November 2026 · **Final evaluation:** 23–27 November 2026
+**Audit date:** 22 October 2026 (updated 23 October 2026) · **Build complete by:** 15 November 2026 · **Final evaluation:** 23–27 November 2026
 
 This audit lists every item in the full project scope (from the approved design:
 problem formulation, architecture, algorithm, experiments, ablations,
@@ -10,7 +10,7 @@ deliverables) and marks it **Done**, **Partial** or **Not started**, with
 evidence from the repository. The completion figure is computed from those
 marks, not estimated.
 
-## 1. Verification run (22 Oct 2026)
+## 1. Verification run (22–23 Oct 2026)
 
 | Check | Result |
 |---|---|
@@ -20,6 +20,9 @@ marks, not estimated.
 | Real LLM (Gemini 3.5 Flash-Lite via OpenAI-compatible API) | working; median 4.1 s per RAG answer |
 | Vercel bundle estimate (Linux wheels, Python 3.12) | ≈ 184 MB packages + 49 MB index/model ≈ 233 MB |
 | Deployed on Vercel | **Live** at https://med-rac.vercel.app (all routes verified: RAG, cache, context rejection, abstain, emergency) |
+| Shared cache (Upstash Redis) on the live site | `backend: redis`, 0 errors; an answer stored by one server instance is reused by others and survives redeploys; cache hits ≈ 4 ms |
+| GitHub Actions CI | green on all 5 pushes (≈ 35 s per run) |
+| Web UI | redesigned (Apple-style, educational pipeline view, fact-check panel, tap-to-call emergency buttons); light/dark, mobile, keyboard and reduced-motion checked |
 
 ## 2. Experimental results so far
 
@@ -102,18 +105,25 @@ phase-2 B1–B6 study.
 | 5 | RAG retrieval: dense MiniLM retrieval; hybrid BM25 + reranker; biomedical-encoder comparison (A7) | 10 | Partial: dense retrieval done and evaluated | 0.6 | `medrac_qa/knowledge.py`, `results/retrieval_liveqa.json` |
 | 6 | Lightweight LLM generation: grounded prompt, provider-agnostic client, LLM-only baseline | 6 | Done | 1.0 | `medrac_qa/llm.py`, `prompts.py` |
 | 7 | Evidence gate (γ) and citation validation (semantic + lexical); NLI entailment check | 8 | Partial: NLI not started | 0.75 | `medrac_qa/evidence.py` |
-| 8 | Web app + API, deployed on Vercel | 8 | Done | 1.0 | `app.py`, `public/`, https://med-rac.vercel.app |
-| 9 | Tests and CI | 5 | Partial: CI not yet run on GitHub | 0.9 | `tests/`, `.github/workflows/ci.yml` |
+| 8 | Web app + API with explanatory UI, deployed on Vercel | 8 | Done | 1.0 | `app.py`, `public/`, https://med-rac.vercel.app |
+| 9 | Tests and CI | 5 | Done (58 tests; CI green on GitHub) | 1.0 | `tests/`, `.github/workflows/ci.yml` |
 | 10 | Experiments: retrieval ✔, cache gate ✔, abstention ✔, pilot ✔; B1–B6 answer-quality study ✘, PubMedQA ✘, remaining ablations (A1, A4–A8, A10) ✘, significance tests ✘ | 25 | Partial | 0.4 | `experiments/` |
 | 11 | Knowledge-preloading CAG variant (context caching) | 5 | Not started (optional in the design) | 0.0 | — |
 | 12 | Synopsis, report, paper draft, demo video | 15 | Partial: synopsis and docs done | 0.2 | `docs/Synopsis.pdf`, `README.md` |
 
-**Weighted completion = 75.5 / 115 ≈ 66%.**
+**Weighted completion = 76.0 / 115 ≈ 66%.**
 
 The working demo covers the complete pipeline: safety → CAG → RAG → LLM →
 validation → cache. It also has measured results for the cache gate, retrieval
 and abstention. The remaining 34% is mostly the full answer-quality evaluation,
 retrieval upgrades and the report.
+
+**How to read this number.** The target for mid-semester was 50–60%. The system
+itself (items 1–9) is essentially complete (≈ 90% of those weights), because a
+working demo needs every stage. Most of the unfinished weight is research work:
+the full baseline comparison, extra experiments and the report (items 10–12,
+≈ 29% done). If only the evaluation and report items are counted, the project is
+clearly in its first half, which is consistent with the plan.
 
 ## 4. Deliberate design decisions
 

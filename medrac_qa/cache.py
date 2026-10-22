@@ -220,6 +220,7 @@ class SemanticCache:
         backend: MemoryBackend | JsonFileBackend | RedisBackend | None = None,
         passage_exists: Callable[[str], bool] = lambda _id: True,
         clock: Callable[[], float] = time.time,
+        sync_interval_s: float = 30.0,
     ) -> None:
         if mode not in ("semantic", "naive", "exact"):
             raise ValueError(f"unknown cache mode {mode}")
@@ -231,10 +232,12 @@ class SemanticCache:
         self.passage_exists = passage_exists
         self.clock = clock
         self._lock = threading.Lock()
+        self.sync_interval_s = sync_interval_s
         self.entries: list[CacheEntry] = []
         self._ids: set[str] = set()
         self._matrix = self._build_matrix()
         self._add(self.backend.load())
+        self._last_sync = time.monotonic()
         self.stats = {"lookups": 0, "hits": 0, "stored": 0}
 
     def _build_matrix(self) -> np.ndarray:
@@ -252,60 +255,79 @@ class SemanticCache:
         rows = np.array([e.embedding for e in new], dtype=np.float32)
         self._matrix = rows if len(self._matrix) == 0 else np.vstack([self._matrix, rows])
 
-    def sync(self) -> None:
-        """Pull answers stored by other server instances (shared backends only)."""
+    def sync(self) -> bool:
+        """Pull answers stored by other server instances. Returns True if anything changed."""
+        self._last_sync = time.monotonic()
         reset, new = self.backend.changes()
         if reset:
             self.entries, self._ids = [], set()
             self._matrix = self._build_matrix()
+        before = len(self.entries)
         self._add(new)
+        return reset or len(self.entries) != before
 
     def __len__(self) -> int:
         return len(self.entries)
 
     # ------------------------------------------------------------------ lookup
     def lookup(self, question: str, q_vec: np.ndarray, profile: QueryProfile) -> CacheDecision:
+        """Local copy first; ask the shared store only when that misses.
+
+        A hit on the local copy needs no network call (a few ms). On a miss we
+        pull other instances' new answers (one Redis call) and try once more.
+        A periodic sync every `sync_interval_s` also picks up "clear" events.
+        """
         with self._lock:
-            self.sync()
             self.stats["lookups"] += 1
-            if not self.entries:
-                return CacheDecision(False)
+            synced = False
+            if time.monotonic() - self._last_sync >= self.sync_interval_s:
+                self.sync()
+                synced = True
+            decision = self._match(question, q_vec, profile)
+            if not decision.hit and not synced and self.sync():
+                decision = self._match(question, q_vec, profile)
+            return decision
 
-            if self.mode == "exact":
-                key = normalize_question(question)
-                for e in self.entries:
-                    if normalize_question(e.question) == key:
-                        return self._accept(e, 1.0, {"exact_match": True})
-                return CacheDecision(False, reason="no exact match")
+    def _match(self, question: str, q_vec: np.ndarray, profile: QueryProfile) -> CacheDecision:
+        """The 4-check cache gate against the entries we currently hold."""
+        if not self.entries:
+            return CacheDecision(False)
 
-            sims = self._matrix @ q_vec.astype(np.float32)
-            best = int(np.argmax(sims))
-            entry, sim = self.entries[best], float(sims[best])
-            checks: dict = {"similarity": sim >= self.threshold}
+        if self.mode == "exact":
+            key = normalize_question(question)
+            for e in self.entries:
+                if normalize_question(e.question) == key:
+                    return self._accept(e, 1.0, {"exact_match": True})
+            return CacheDecision(False, reason="no exact match")
 
-            # 1. similarity
-            if sim < self.threshold:
-                return CacheDecision(False, entry, sim, f"similarity {sim:.2f} below {self.threshold:.2f}", checks)
+        sims = self._matrix @ q_vec.astype(np.float32)
+        best = int(np.argmax(sims))
+        entry, sim = self.entries[best], float(sims[best])
+        checks: dict = {"similarity": sim >= self.threshold}
 
-            # 2. freshness
-            fresh = entry.kb_version == self.kb_version and self.clock() - entry.created_at <= self.ttl
-            checks["fresh"] = fresh
-            if not fresh:
-                return CacheDecision(False, entry, sim, "cached answer is out of date", checks)
+        # 1. similarity
+        if sim < self.threshold:
+            return CacheDecision(False, entry, sim, f"similarity {sim:.2f} below {self.threshold:.2f}", checks)
 
-            if self.mode == "semantic":
-                # 3. clinical context
-                ok, why = compatible(profile, QueryProfile.from_dict(entry.profile))
-                checks["context"] = ok
-                if not ok:
-                    return CacheDecision(False, entry, sim, f"rejected: {why}", checks)
-                # 4. evidence still present
-                evidence_ok = bool(entry.citations) and all(self.passage_exists(c["id"]) for c in entry.citations)
-                checks["evidence"] = evidence_ok
-                if not evidence_ok:
-                    return CacheDecision(False, entry, sim, "rejected: evidence no longer available", checks)
+        # 2. freshness
+        fresh = entry.kb_version == self.kb_version and self.clock() - entry.created_at <= self.ttl
+        checks["fresh"] = fresh
+        if not fresh:
+            return CacheDecision(False, entry, sim, "cached answer is out of date", checks)
 
-            return self._accept(entry, sim, checks)
+        if self.mode == "semantic":
+            # 3. clinical context
+            ok, why = compatible(profile, QueryProfile.from_dict(entry.profile))
+            checks["context"] = ok
+            if not ok:
+                return CacheDecision(False, entry, sim, f"rejected: {why}", checks)
+            # 4. evidence still present
+            evidence_ok = bool(entry.citations) and all(self.passage_exists(c["id"]) for c in entry.citations)
+            checks["evidence"] = evidence_ok
+            if not evidence_ok:
+                return CacheDecision(False, entry, sim, "rejected: evidence no longer available", checks)
+
+        return self._accept(entry, sim, checks)
 
     def _accept(self, entry: CacheEntry, sim: float, checks: dict) -> CacheDecision:
         entry.hits += 1

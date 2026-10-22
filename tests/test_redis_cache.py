@@ -38,8 +38,9 @@ class FakeRedis:
         return out
 
 
-def _instance(redis: FakeRedis) -> SemanticCache:
-    return SemanticCache("v1", threshold=0.8, backend=RedisBackend("https://x", "t", transport=redis))
+def _instance(redis: FakeRedis, sync_interval_s: float = 30.0) -> SemanticCache:
+    backend = RedisBackend("https://x", "t", transport=redis)
+    return SemanticCache("v1", threshold=0.8, backend=backend, sync_interval_s=sync_interval_s)
 
 
 def _store(cache, encoder, q):
@@ -76,7 +77,7 @@ def test_own_entries_are_not_duplicated(encoder):
 
 def test_clear_on_one_instance_resets_the_others(encoder):
     redis = FakeRedis()
-    a, b = _instance(redis), _instance(redis)
+    a, b = _instance(redis), _instance(redis, sync_interval_s=0)  # b syncs before every lookup
     _store(a, encoder, "What is anemia?")
     _store(a, encoder, "How is glaucoma diagnosed?")
     assert _lookup(b, encoder, "What is anemia?").hit
@@ -94,13 +95,17 @@ def test_redis_outage_does_not_break_answering(encoder):
     redis.down = True
     _store(a, encoder, "What is anemia?")           # save fails quietly
     d = _lookup(a, encoder, "What is anemia?")     # still served from local copy
-    assert d.hit and a.backend.errors >= 2
+    assert d.hit
+    assert not _lookup(a, encoder, "How is glaucoma diagnosed?").hit   # failed sync = plain miss
+    assert a.backend.errors == 2
 
 
-def test_one_request_per_lookup(encoder):
+def test_local_hit_needs_no_redis_call_and_miss_needs_one(encoder):
     redis = FakeRedis()
     a = _instance(redis)
     _store(a, encoder, "What is anemia?")
     before = redis.requests
-    _lookup(a, encoder, "What is anemia?")
-    assert redis.requests - before == 1
+    assert _lookup(a, encoder, "What is anemia?").hit
+    assert redis.requests == before                  # served from the local copy
+    assert not _lookup(a, encoder, "How is glaucoma diagnosed?").hit
+    assert redis.requests == before + 1              # miss: one sync to check other instances

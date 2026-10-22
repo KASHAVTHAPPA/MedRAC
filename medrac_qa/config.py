@@ -68,8 +68,18 @@ class Settings:
     # tau: minimum cosine similarity between two questions for a cache hit
     cache_threshold: float = field(default_factory=lambda: _float("CACHE_THRESHOLD", 0.85))
     cache_ttl_days: float = field(default_factory=lambda: _float("CACHE_TTL_DAYS", 30.0))
-    # Empty: in-memory cache (per server instance). A path: persist to a JSON-lines file.
-    # (A shared Redis backend for serverless deployments is planned for phase 2.)
+    # Where cached answers live, in order of preference:
+    #   1. shared Redis (Upstash REST) when its URL + token are set: all server
+    #      instances share one cache. Vercel's Upstash integration sets either
+    #      the UPSTASH_REDIS_REST_* or the KV_REST_API_* names automatically.
+    #   2. a JSON-lines file when CACHE_FILE is set (local runs)
+    #   3. memory of this process
+    redis_url: str = field(
+        default_factory=lambda: _env("UPSTASH_REDIS_REST_URL", _env("KV_REST_API_URL", ""))
+    )
+    redis_token: str = field(
+        default_factory=lambda: _env("UPSTASH_REDIS_REST_TOKEN", _env("KV_REST_API_TOKEN", ""))
+    )
     cache_file: str = field(default_factory=lambda: _env("CACHE_FILE", ""))
 
     # ---- Files ----

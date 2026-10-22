@@ -14,12 +14,12 @@ marks, not estimated.
 
 | Check | Result |
 |---|---|
-| `pytest -q` (unit + API tests; fake LLM, real index) | **52 passed** |
+| `pytest -q` (unit + API tests; fake LLM, real index, fake Redis) | **58 passed** |
 | Knowledge base build (`scripts/build_index.py`) | 16,407 QA pairs → 15,809 unique answers → 27,470 passages, 26.6 MB, 8 min on CPU |
 | Local web app (`uvicorn app:app`) | all routes work in the browser (desktop and 500 px mobile): RAG, cache, abstain, emergency |
 | Real LLM (Gemini 3.5 Flash-Lite via OpenAI-compatible API) | working; median 4.1 s per RAG answer |
 | Vercel bundle estimate (Linux wheels, Python 3.12) | ≈ 184 MB packages + 49 MB index/model ≈ 233 MB |
-| Deployed on Vercel | **Not yet.** The repository is deploy-ready; deployment is done by the student |
+| Deployed on Vercel | **Live** at https://med-rac.vercel.app (all routes verified: RAG, cache, context rejection, abstain, emergency) |
 
 ## 2. Experimental results so far
 
@@ -98,21 +98,21 @@ phase-2 B1–B6 study.
 | 1 | Knowledge base: MedQuAD parsing, de-duplication, chunking (180 words ≈ MiniLM's 256-token window), embeddings, versioned index | 10 | Done | 1.0 | `scripts/build_index.py`, `data/index/manifest.json` |
 | 2 | Safety screening: emergencies (112/108, Tele-MANAS 14416), never-cache rules, disclaimers | 5 | Partial: rules + unit tests; no dedicated safety evaluation set yet | 0.8 | `medrac_qa/safety.py`, `tests/test_safety.py` |
 | 3 | Query analysis: intent, clinical qualifiers, numbers, topic words; compatibility check | 8 | Done | 1.0 | `medrac_qa/query_analysis.py` |
-| 4 | CAG semantic cache: 4-check gate, TTL + KB-version freshness, exact/naive baselines, memory/file backends | 10 | Partial: shared Redis backend for serverless not built | 0.8 | `medrac_qa/cache.py`, `tests/test_cache.py` |
+| 4 | CAG semantic cache: 4-check gate, TTL + KB-version freshness, exact/naive baselines, memory/file/shared-Redis backends | 10 | Done | 1.0 | `medrac_qa/cache.py`, `tests/test_cache.py`, `tests/test_redis_cache.py` |
 | 5 | RAG retrieval: dense MiniLM retrieval; hybrid BM25 + reranker; biomedical-encoder comparison (A7) | 10 | Partial: dense retrieval done and evaluated | 0.6 | `medrac_qa/knowledge.py`, `results/retrieval_liveqa.json` |
 | 6 | Lightweight LLM generation: grounded prompt, provider-agnostic client, LLM-only baseline | 6 | Done | 1.0 | `medrac_qa/llm.py`, `prompts.py` |
 | 7 | Evidence gate (γ) and citation validation (semantic + lexical); NLI entailment check | 8 | Partial: NLI not started | 0.75 | `medrac_qa/evidence.py` |
-| 8 | Web app + API, deploy-ready for Vercel | 8 | Partial: deploy-ready, not deployed | 0.9 | `app.py`, `public/`, `vercel.json` |
+| 8 | Web app + API, deployed on Vercel | 8 | Done | 1.0 | `app.py`, `public/`, https://med-rac.vercel.app |
 | 9 | Tests and CI | 5 | Partial: CI not yet run on GitHub | 0.9 | `tests/`, `.github/workflows/ci.yml` |
 | 10 | Experiments: retrieval ✔, cache gate ✔, abstention ✔, pilot ✔; B1–B6 answer-quality study ✘, PubMedQA ✘, remaining ablations (A1, A4–A8, A10) ✘, significance tests ✘ | 25 | Partial | 0.4 | `experiments/` |
 | 11 | Knowledge-preloading CAG variant (context caching) | 5 | Not started (optional in the design) | 0.0 | — |
 | 12 | Synopsis, report, paper draft, demo video | 15 | Partial: synopsis and docs done | 0.2 | `docs/Synopsis.pdf`, `README.md` |
 
-**Weighted completion = 72.7 / 115 ≈ 63%.**
+**Weighted completion = 75.5 / 115 ≈ 66%.**
 
 The working demo covers the complete pipeline: safety → CAG → RAG → LLM →
 validation → cache. It also has measured results for the cache gate, retrieval
-and abstention. The remaining 37% is mostly the full answer-quality evaluation,
+and abstention. The remaining 34% is mostly the full answer-quality evaluation,
 retrieval upgrades and the report.
 
 ## 4. Deliberate design decisions
@@ -151,6 +151,6 @@ retrieval upgrades and the report.
 |---|---|
 | 23 Oct – 31 Oct | B1–B6 study on ~300 questions (LiveQA + held-out MedQuAD): ROUGE-L, semantic similarity, citation precision, latency; PubMedQA accuracy / macro-F1 |
 | 1 Nov – 8 Nov | Hybrid BM25 + dense retrieval; biomedical encoder comparison (A7); k sweep (A8); NLI claim check; safety test set |
-| 9 Nov – 15 Nov | Shared Redis cache and Vercel deployment; knowledge-preloading CAG experiment; paired bootstrap / McNemar tests; freeze results |
+| 9 Nov – 15 Nov | Knowledge-preloading CAG experiment; paired bootstrap / McNemar tests; freeze results |
 | 16 Nov – 22 Nov | Report, paper draft, demo video |
 | 23 – 27 Nov | Final evaluation |

@@ -106,7 +106,7 @@ Details and limitations are in [`docs/MIDSEM_PROGRESS.md`](docs/MIDSEM_PROGRESS.
 | Vector search | NumPy dot product (exact) | 27k vectors take about 1 ms; FAISS is only worth it at millions |
 | Knowledge base | MedQuAD: 15,809 NIH answers in 9 subsets | trusted sources, CC BY 4.0 |
 | API / UI | FastAPI + plain HTML/CSS/JS | no build step; deploys to Vercel as-is |
-| Tests | pytest (52 tests) + GitHub Actions | fake encoder and fake LLM, so no API key is needed |
+| Tests | pytest (58 tests) + GitHub Actions | fake encoder and fake LLM, so no API key is needed |
 
 ## Project layout
 
@@ -115,7 +115,8 @@ medrac_qa/            the framework (each file is one step of the pipeline)
   safety.py           emergency + never-cache rules
   query_analysis.py   intent, clinical qualifiers, topic words; compatible()
   embedder.py         MiniLM via ONNX Runtime (tokenise → encode → mean-pool → normalise)
-  cache.py            CAG: semantic cache with the 4-check gate (+ exact/naive baselines)
+  cache.py            CAG: semantic cache with the 4-check gate (+ exact/naive baselines),
+                      memory / file / shared Redis storage
   knowledge.py        RAG: load index, cosine top-k
   evidence.py         evidence gate + sentence-level citation validation
   llm.py, prompts.py  OpenAI-compatible client and prompt templates
@@ -178,8 +179,11 @@ and `public/` is served by the CDN.
 Notes:
 - The function bundle is about 235 MB (NumPy + ONNX Runtime + index + model), within Vercel's limit.
 - `vercel.json` excludes tests, docs and raw data from the bundle.
-- On serverless, the cache lives in each warm instance's memory. It works for
-  demos; a shared Redis cache is planned (see roadmap).
+- **Shared cache (recommended):** Vercel → your project → **Storage** → **Create
+  Database** → **Upstash for Redis** (free plan) → connect it to the project, then
+  redeploy. Vercel adds the Redis URL and token as environment variables and the
+  app uses them automatically; `/api/health` then shows `"backend": "redis"`.
+  Without it, each serverless instance keeps its own in-memory cache.
 - Rate limit: 20 questions per minute per IP (`RATE_LIMIT_PER_MIN`).
 
 ## Configuration
@@ -194,7 +198,8 @@ All settings are environment variables (see [`.env.example`](.env.example)):
 | `EVIDENCE_THRESHOLD` (γ) | 0.40 | minimum retrieval score before answering (chosen in `eval_abstention.py`) |
 | `SUPPORT_THRESHOLD` (δ) | 0.40 | sentence-to-passage similarity counted as support |
 | `CACHE_TTL_DAYS` | 30 | cached answers expire after this many days |
-| `CACHE_FILE` | (memory) | path to persist the cache as JSON lines |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` (or `KV_REST_API_URL` / `_TOKEN`) | – | shared Redis cache for all server instances |
+| `CACHE_FILE` | (memory) | path to persist the cache as JSON lines (local runs) |
 
 ## Roadmap (to 15 November 2026)
 
@@ -202,7 +207,7 @@ All settings are environment variables (see [`.env.example`](.env.example)):
 - [ ] PubMedQA (yes/no/maybe) accuracy and macro-F1: LLM-only vs evidence-grounded
 - [ ] Hybrid retrieval (BM25 + dense), and a comparison with a biomedical embedding model
 - [ ] NLI-based claim verification in place of the similarity check
-- [ ] Shared persistent cache (Upstash Redis) for serverless deployments
+- [x] Shared persistent cache (Upstash Redis) for serverless deployments
 - [ ] Safety test set (emergency and never-cache recall)
 - [ ] Knowledge-preloading CAG variant (context caching) as an experiment
 - [ ] Final report and demo video

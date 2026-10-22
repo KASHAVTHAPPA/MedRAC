@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .cache import JsonFileBackend, MemoryBackend, SemanticCache
+from .cache import JsonFileBackend, MemoryBackend, RedisBackend, SemanticCache
 from .config import Settings, load_dotenv
 from .embedder import MiniLMEmbedder
 from .knowledge import KnowledgeBase
@@ -17,7 +17,13 @@ def build_pipeline(settings: Settings | None = None, cache_mode: str = "semantic
     s = settings or Settings()
     kb = KnowledgeBase.load(s.index_dir)
     encoder = MiniLMEmbedder(s.model_dir)
-    backend = JsonFileBackend(Path(s.cache_file)) if s.cache_file else MemoryBackend()
+    if s.redis_url and s.redis_token:
+        # One key per knowledge-base version, so a rebuilt index starts a fresh cache.
+        backend = RedisBackend(s.redis_url, s.redis_token, key=f"medrac:cache:{kb.version}")
+    elif s.cache_file:
+        backend = JsonFileBackend(Path(s.cache_file))
+    else:
+        backend = MemoryBackend()
     cache = SemanticCache(
         kb_version=kb.version,
         threshold=s.cache_threshold,
